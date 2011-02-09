@@ -20,11 +20,14 @@
 #pragma mark Internal
 
 -(void)addAmericanasStoresLocationsToMap {
-    NSArray* americanasStores = [AllAmericanasStores findStores];
+    AllAmericanasStores* allAmericanasStores = [[AllAmericanasStores alloc] init];
+    NSArray* americanasStores = [allAmericanasStores foundedStores];
     
     for (AmericanasStore* store in americanasStores) {
         [self.mapView addAnnotation:store];
     }
+    
+    [allAmericanasStores release];
 }
 
 -(void)configureMap {

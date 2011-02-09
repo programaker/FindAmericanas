@@ -8,11 +8,14 @@
 
 #import <Foundation/Foundation.h>
 
-
 @interface AllAmericanasStores : NSObject {
 
 }
 
-+(NSArray*)findStores;
+@property(nonatomic,retain) NSURLConnection* findStoresUrlConnection;
+@property(nonatomic,retain) NSMutableData* foundStoresRawData;
+
+-(NSArray*)foundedStores;
+-(void)findStoresNearLatitude:(double)latitude longitude:(double)longitude;
 
 @end
