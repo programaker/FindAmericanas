@@ -14,6 +14,8 @@
 
 @synthesize findStoresUrlConnection;
 @synthesize foundStoresRawData;
+@synthesize americanasStoreFactory;
+@synthesize storesFoundInSearch;
 
 
 #pragma mark -
@@ -22,6 +24,8 @@
 -(void)dealloc {
     [self.findStoresUrlConnection release];
     [self.foundStoresRawData release];
+    [self.americanasStoreFactory release];
+    [self.storesFoundInSearch release];
     [super dealloc];
 }
 
@@ -48,15 +52,17 @@
 #pragma mark -
 #pragma mark Services
 
--(NSArray*)foundedStores {
+-(NSArray*)foundStores {
     NSMutableArray* allStores = [[NSMutableArray alloc] init];  
     
     AmericanasStore* ouvidorStore = [[AmericanasStore alloc] 
         initWithCoordinate:CLLocationCoordinate2DMake(-22.90415, -43.17996) 
+        name: @"Lojas Americanas"
         address:@"Rua do Ouvidor, nº 175"];
         
     AmericanasStore* passeioStore = [[AmericanasStore alloc] 
         initWithCoordinate:CLLocationCoordinate2DMake(-22.91201, -43.17663) 
+        name: @"Lojas Americanas"
         address:@"Rua do Passeio, nº 42"];
     
     [allStores addObject:[ouvidorStore autorelease]];
@@ -84,11 +90,11 @@
 }
 
 - (void)connectionDidFinishLoading:(NSURLConnection*)connection {
-	
+	self.storesFoundInSearch = [self.americanasStoreFactory createFrom:self.foundStoresRawData];
 }
 
 - (void)connection:(NSURLConnection*)connection didFailWithError:(NSError*)error {
-		
+    NSLog(@"Error retrieving locations from Google Maps");
 }
 
 @end

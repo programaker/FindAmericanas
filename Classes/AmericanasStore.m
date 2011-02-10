@@ -14,14 +14,12 @@
 @synthesize coordinate;
 @synthesize title;
 @synthesize subtitle;
-@synthesize address;
 
--(id)initWithCoordinate:(CLLocationCoordinate2D)_coordinate address:(NSString*)_address {
+-(id)initWithCoordinate:(CLLocationCoordinate2D)_coordinate name:(NSString*)_name address:(NSString*)_address {
     if (self = [super init]) {
         self.coordinate = _coordinate;
-        self.address = _address;
-        self.title = _address;
-        self.subtitle = nil;
+        self.title = _name;
+        self.subtitle = _address;
     }
     
     return self;
@@ -30,7 +28,6 @@
 -(void)dealloc {
     [self.title release];
     [self.subtitle release];
-    [self.address release];
     [super dealloc];
 }
 

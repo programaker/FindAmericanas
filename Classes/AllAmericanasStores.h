@@ -7,6 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "AmericanasStoreFactory.h"
 
 @interface AllAmericanasStores : NSObject {
 
@@ -14,8 +15,10 @@
 
 @property(nonatomic,retain) NSURLConnection* findStoresUrlConnection;
 @property(nonatomic,retain) NSMutableData* foundStoresRawData;
+@property(nonatomic,retain) AmericanasStoreFactory* americanasStoreFactory;
+@property(nonatomic,retain) NSArray* storesFoundInSearch;
 
--(NSArray*)foundedStores;
+-(NSArray*)foundStores;
 -(void)findStoresNearLatitude:(double)latitude longitude:(double)longitude;
 
 @end

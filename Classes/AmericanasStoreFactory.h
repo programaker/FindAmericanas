@@ -7,6 +7,8 @@
 //
 
 #import <Foundation/Foundation.h>
+#import <MapKit/MapKit.h>
+#import "AmericanasStore.h"
 
 
 @interface AmericanasStoreFactory : NSObject<NSXMLParserDelegate> {

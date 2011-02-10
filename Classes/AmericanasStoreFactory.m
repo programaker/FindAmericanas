@@ -23,7 +23,7 @@
 
 -(id)init {
 	if (self = [super init]) {
-		self.propertyNames = [[NSSet alloc] initWithObjects:@"name",@"description",@"imageUrl",nil];
+		self.propertyNames = [[NSSet alloc] initWithObjects:@"name",@"address",@"coordinates",nil];
 	}
 	
 	return self;
@@ -40,10 +40,33 @@
 
 
 #pragma mark -
+#pragma mark Internal
+
+-(CLLocationCoordinate2D)parseCoordinates:(NSString*)coordinatesFromGoogleMaps {
+    NSArray* splittedCoordinates = [coordinatesFromGoogleMaps componentsSeparatedByString:@","];
+    
+    NSString* latitudeString = [splittedCoordinates objectAtIndex:0];
+    NSString* longitudeString = [splittedCoordinates objectAtIndex:1];
+    
+    double latitude = [latitudeString doubleValue];
+    double longitude = [longitudeString doubleValue];
+    
+    return CLLocationCoordinate2DMake(latitude, longitude);
+}
+
+
+#pragma mark -
 #pragma mark Services
 
 -(NSArray*)createFrom:(NSData*)storesXmlData {
-
+    self.createdStores = [[NSMutableArray alloc] init];
+	
+	NSXMLParser* xmlParser = [[NSXMLParser alloc] initWithData:storesXmlData];
+	[xmlParser setDelegate:self];
+	[xmlParser parse];
+	[xmlParser release];
+	
+	return [self.createdStores autorelease];
 }
 
 
@@ -56,11 +79,25 @@
         qualifiedName:(NSString*)qualifiedName 
         attributes:(NSDictionary*)attributeDict {
     
-	
+	if ([@"Placemark" isEqualToString:elementName]) {
+		NSLog(@"Starting a store");
+		self.storeProperties = [[NSMutableDictionary alloc] init];
+	}
+	else if ([propertyNames containsObject:elementName]) {
+		NSLog(@"Starting property:[%@]", elementName);
+		self.currentProperty = elementName;
+		self.currentPropertyValue = [[NSMutableString alloc] init];
+	}
 }
 
 -(void)parser:(NSXMLParser*)parser foundCharacters:(NSString*)foundCharacters {
-	
+	if ([propertyNames containsObject:currentProperty]) {
+		NSString* sanitizedString = [foundCharacters stringByTrimmingCharactersInSet:
+            [NSCharacterSet whitespaceAndNewlineCharacterSet]];		
+		
+        NSLog(@"Adding value:[%@] to property:[%@]", sanitizedString, currentProperty);
+		[currentPropertyValue appendString:sanitizedString];
+	}
 }
 
 -(void)parser:(NSXMLParser*)parser
@@ -68,7 +105,23 @@
         namespaceURI:(NSString*)namespaceURI
         qualifiedName:(NSString*)qualifiedName {
     
-	
+	if ([@"Placemark" isEqualToString:elementName]) {
+		NSLog(@"Ending the store");        
+        CLLocationCoordinate2D storeCoordinates = [self parseCoordinates:[storeProperties valueForKey:@"coordinates"]];
+		
+		AmericanasStore* newStore = [[AmericanasStore alloc] 
+            initWithCoordinate:storeCoordinates
+            name:[storeProperties valueForKey:@"name"]
+            address:[storeProperties valueForKey:@"address"]];
+		
+		[self.createdStores addObject:[newStore autorelease]];
+		[self.storeProperties release];
+	}
+	else if ([propertyNames containsObject:elementName]) {
+		NSLog(@"Ending property:[%@]", elementName);
+		[self.storeProperties setValue:currentPropertyValue forKey:elementName];
+		[self.currentPropertyValue release];
+	}
 }
 
 @end

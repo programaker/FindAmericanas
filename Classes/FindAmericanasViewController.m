@@ -21,7 +21,7 @@
 
 -(void)addAmericanasStoresLocationsToMap {
     AllAmericanasStores* allAmericanasStores = [[AllAmericanasStores alloc] init];
-    NSArray* americanasStores = [allAmericanasStores foundedStores];
+    NSArray* americanasStores = [allAmericanasStores foundStores];
     
     for (AmericanasStore* store in americanasStores) {
         [self.mapView addAnnotation:store];
