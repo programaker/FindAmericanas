@@ -46,6 +46,7 @@
 		CA555DCD1301C3EC003C31F4 /* AllAmericanasStores.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AllAmericanasStores.h; sourceTree = "<group>"; };
 		CA555DCE1301C3EC003C31F4 /* AllAmericanasStores.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AllAmericanasStores.m; sourceTree = "<group>"; };
 		CA612B3F12FADB2C0090AE14 /* MapKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MapKit.framework; path = System/Library/Frameworks/MapKit.framework; sourceTree = SDKROOT; };
+		CA8D47D213041F8B00B1C5BD /* AllAmericanasStoresDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AllAmericanasStoresDelegate.h; sourceTree = "<group>"; };
 		CAB61845130218F70068168D /* americanas-pin-icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "americanas-pin-icon.png"; sourceTree = "<group>"; };
 		CAB6185113021B830068168D /* AmericanasMapPin.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = AmericanasMapPin.h; sourceTree = "<group>"; };
 		CAB6185213021B830068168D /* AmericanasMapPin.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = AmericanasMapPin.m; sourceTree = "<group>"; };
@@ -82,6 +83,7 @@
 				CAB6185213021B830068168D /* AmericanasMapPin.m */,
 				CA3811011303066C00DE6D51 /* AmericanasStoreFactory.h */,
 				CA3811021303066C00DE6D51 /* AmericanasStoreFactory.m */,
+				CA8D47D213041F8B00B1C5BD /* AllAmericanasStoresDelegate.h */,
 			);
 			path = Classes;
 			sourceTree = "<group>";

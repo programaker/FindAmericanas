@@ -8,6 +8,7 @@
 
 #import <Foundation/Foundation.h>
 #import "AmericanasStoreFactory.h"
+#import "AllAmericanasStoresDelegate.h"
 
 @interface AllAmericanasStores : NSObject {
 
@@ -17,8 +18,9 @@
 @property(nonatomic,retain) NSMutableData* foundStoresRawData;
 @property(nonatomic,retain) AmericanasStoreFactory* americanasStoreFactory;
 @property(nonatomic,retain) NSArray* storesFoundInSearch;
+@property(nonatomic,retain) id<AllAmericanasStoresDelegate> delegate;
 
--(NSArray*)foundStores;
+-(id)initWithDelegate:(id<AllAmericanasStoresDelegate>)_delegate;
 -(void)findStoresNearLatitude:(double)latitude longitude:(double)longitude;
 
 @end

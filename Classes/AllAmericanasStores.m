@@ -16,10 +16,20 @@
 @synthesize foundStoresRawData;
 @synthesize americanasStoreFactory;
 @synthesize storesFoundInSearch;
+@synthesize delegate;
 
 
 #pragma mark -
 #pragma mark Lifecycle
+
+-(id)initWithDelegate:(id<AllAmericanasStoresDelegate>)_delegate {
+    if (self = [super init]) {
+        self.delegate = _delegate;
+        self.americanasStoreFactory = [[AmericanasStoreFactory alloc] init];
+    }
+    
+    return self;
+}
 
 -(void)dealloc {
     [self.findStoresUrlConnection release];
@@ -52,29 +62,12 @@
 #pragma mark -
 #pragma mark Services
 
--(NSArray*)foundStores {
-    NSMutableArray* allStores = [[NSMutableArray alloc] init];  
-    
-    AmericanasStore* ouvidorStore = [[AmericanasStore alloc] 
-        initWithCoordinate:CLLocationCoordinate2DMake(-22.90415, -43.17996) 
-        name: @"Lojas Americanas"
-        address:@"Rua do Ouvidor, nº 175"];
-        
-    AmericanasStore* passeioStore = [[AmericanasStore alloc] 
-        initWithCoordinate:CLLocationCoordinate2DMake(-22.91201, -43.17663) 
-        name: @"Lojas Americanas"
-        address:@"Rua do Passeio, nº 42"];
-    
-    [allStores addObject:[ouvidorStore autorelease]];
-    [allStores addObject:[passeioStore autorelease]];
-    
-    return [allStores autorelease];
-}
-
 -(void)findStoresNearLatitude:(double)latitude longitude:(double)longitude {
     self.foundStoresRawData = [NSMutableData data];
     
     NSString* googleMapsRequestUrl = [self buildUrlWithLatitude:latitude longitude:longitude];
+    NSLog(@"Google Maps request URL:[%@]", googleMapsRequestUrl);
+    
     NSURL* url = [NSURL URLWithString:googleMapsRequestUrl];
     NSURLRequest* request = [NSURLRequest requestWithURL:url cachePolicy:NSURLRequestUseProtocolCachePolicy timeoutInterval:30.0];
     
@@ -86,11 +79,15 @@
 #pragma mark NSURLConnection Delegate
 
 - (void)connection:(NSURLConnection*)connection didReceiveData:(NSData*)receivedData {
-	[self.foundStoresRawData appendData:receivedData];
+    [self.foundStoresRawData appendData:receivedData];
 }
 
 - (void)connectionDidFinishLoading:(NSURLConnection*)connection {
+    NSLog(@"Finish loading Google Maps XML. %d bytes loaded", [self.foundStoresRawData bytes]);
 	self.storesFoundInSearch = [self.americanasStoreFactory createFrom:self.foundStoresRawData];
+    
+    NSLog(@"%d stores created from XML", [self.storesFoundInSearch count]);
+    [self.delegate didFinishLoadingStores:storesFoundInSearch];
 }
 
 - (void)connection:(NSURLConnection*)connection didFailWithError:(NSError*)error {

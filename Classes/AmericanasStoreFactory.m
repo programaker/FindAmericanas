@@ -11,6 +11,7 @@
 
 @implementation AmericanasStoreFactory
 
+@synthesize xmlParser;
 @synthesize propertyNames;
 @synthesize storeProperties;
 @synthesize currentProperty;
@@ -30,6 +31,7 @@
 }
 
 -(void)dealloc {
+    [self.xmlParser release];
 	[self.propertyNames release];
 	[self.currentPropertyValue release];
 	[self.storeProperties release];
@@ -60,12 +62,11 @@
 
 -(NSArray*)createFrom:(NSData*)storesXmlData {
     self.createdStores = [[NSMutableArray alloc] init];
-	
-	NSXMLParser* xmlParser = [[NSXMLParser alloc] initWithData:storesXmlData];
-	[xmlParser setDelegate:self];
-	[xmlParser parse];
-	[xmlParser release];
-	
+    
+	self.xmlParser = [[NSXMLParser alloc] initWithData:storesXmlData];
+    [self.xmlParser setDelegate:self];
+	[self.xmlParser parse];
+		
 	return [self.createdStores autorelease];
 }
 
@@ -73,11 +74,17 @@
 #pragma mark -
 #pragma mark NSXMLParserDelegate
 
+-(void)parserDidStartDocument:(NSXMLParser*)parser {
+    NSLog(@"Start parsing de xml document");
+}
+
 -(void)parser:(NSXMLParser*)parser 
         didStartElement:(NSString*)elementName 
         namespaceURI:(NSString*)namespaceURI 
         qualifiedName:(NSString*)qualifiedName 
         attributes:(NSDictionary*)attributeDict {
+    
+    NSLog(@"Starting element:[%@]", elementName);
     
 	if ([@"Placemark" isEqualToString:elementName]) {
 		NSLog(@"Starting a store");
@@ -95,8 +102,7 @@
 		NSString* sanitizedString = [foundCharacters stringByTrimmingCharactersInSet:
             [NSCharacterSet whitespaceAndNewlineCharacterSet]];		
 		
-        NSLog(@"Adding value:[%@] to property:[%@]", sanitizedString, currentProperty);
-		[currentPropertyValue appendString:sanitizedString];
+        [currentPropertyValue appendString:sanitizedString];
 	}
 }
 
@@ -104,6 +110,8 @@
         didEndElement:(NSString*)elementName
         namespaceURI:(NSString*)namespaceURI
         qualifiedName:(NSString*)qualifiedName {
+    
+    NSLog(@"Ending element:[%@]", elementName);
     
 	if ([@"Placemark" isEqualToString:elementName]) {
 		NSLog(@"Ending the store");        
@@ -122,6 +130,14 @@
 		[self.storeProperties setValue:currentPropertyValue forKey:elementName];
 		[self.currentPropertyValue release];
 	}
+}
+
+-(void)parserDidEndDocument:(NSXMLParser*)parser {
+    NSLog(@"End parsing xml document");
+}
+
+- (void)parser:(NSXMLParser*)parser parseErrorOccurred:(NSError*)parseError {
+    NSLog(@"Parse error with code:[%i]", [parseError code]);
 }
 
 @end

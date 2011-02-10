@@ -15,6 +15,7 @@
 
 }
 
+@property(nonatomic,retain) NSXMLParser* xmlParser;
 @property(nonatomic,assign) NSSet* propertyNames;
 @property(nonatomic,retain) NSMutableDictionary* storeProperties;
 @property(nonatomic,retain) NSString* currentProperty;
