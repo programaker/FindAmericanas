@@ -7,15 +7,24 @@
 //
 
 #import "FindAmericanasViewController.h"
-#import "AllAmericanasStores.h"
 #import "AmericanasStore.h"
 #import "AmericanasMapPin.h"
 
 @implementation FindAmericanasViewController
 
 @synthesize mapView;
-@synthesize allAmericanasStores;
+@synthesize americanasStoreRepository;
 @synthesize mockUserLocation;
+
+
+#pragma mark -
+#pragma mark Lifecycle
+
+- (void)dealloc {
+    [self.mapView release];
+    [self.americanasStoreRepository release];
+    [super dealloc];
+}
 
 
 #pragma mark -
@@ -40,13 +49,11 @@
 
 
 #pragma mark -
-#pragma mark AllAmericanasStoresDelegate
+#pragma mark AmericanasStoreRepositoryDelegate
 
--(void)didFinishLoadingStores:(NSArray*)stores {
-    for (AmericanasStore* store in stores) {
-        NSLog(@"Adding loaded store:[%@] to map", store.title);
-        [self.mapView addAnnotation:store];
-    }
+-(void)didCreateStore:(AmericanasStore*)store {
+    NSLog(@"Adding loaded store:[%@] to map", store.title);
+    [self.mapView addAnnotation:store];
 }
 
 
@@ -63,7 +70,7 @@
 
 
 #pragma mark -
-#pragma mark Others
+#pragma mark View
 								
 - (void)viewDidLoad {
     [super viewDidLoad];
@@ -74,22 +81,14 @@
     self.mockUserLocation = assembleiaStreet98;
     
     [self configureMap];
-    self.allAmericanasStores = [[AllAmericanasStores alloc] initWithDelegate:self];
-    [self.allAmericanasStores findStoresNearLatitude:assembleiaStreet98.latitude longitude:assembleiaStreet98.longitude];
+    
+    self.americanasStoreRepository = [[AmericanasStoreRepository alloc] initWithDelegate:self];
+    //[self.americanasStoreRepository findStoresNearLatitude:assembleiaStreet98.latitude longitude:assembleiaStreet98.longitude];
+    [self.americanasStoreRepository findMockStores];
 }
 
 -(void)viewDidUnload {
-    [self.allAmericanasStores release];
-}
-
-
-#pragma mark -
-#pragma mark Lifecycle
-
-- (void)dealloc {
-    [self.mapView release];
-    [self.allAmericanasStores release];
-    [super dealloc];
+    [self.americanasStoreRepository release];
 }
 
 @end

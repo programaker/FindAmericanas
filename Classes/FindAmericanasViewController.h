@@ -8,17 +8,16 @@
 
 #import <UIKit/UIKit.h>
 #import <MapKit/MapKit.h>
-#import "AllAmericanasStoresDelegate.h"
-#import "AllAmericanasStores.h"
+#import "AmericanasStoreRepository.h"
+#import "AmericanasStoreRepositoryDelegate.h"
 
-
-@interface FindAmericanasViewController : UIViewController<CLLocationManagerDelegate,MKMapViewDelegate,AllAmericanasStoresDelegate> {
+@interface FindAmericanasViewController : UIViewController<MKMapViewDelegate,AmericanasStoreRepositoryDelegate> {
 
 }
 
 @property(nonatomic,retain) IBOutlet MKMapView* mapView;
 @property(nonatomic,readwrite) CLLocationCoordinate2D mockUserLocation;
-@property(nonatomic,retain) AllAmericanasStores* allAmericanasStores;
+@property(nonatomic,retain) AmericanasStoreRepository* americanasStoreRepository;
 
 @end
 
