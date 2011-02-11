@@ -52,7 +52,7 @@
 #pragma mark AmericanasStoreRepositoryDelegate
 
 -(void)didCreateStore:(AmericanasStore*)store {
-    NSLog(@"Adding loaded store:[%@] to map", store.title);
+    NSLog(@"+++ Adding loaded store:[%@] to map", store.title);
     [self.mapView addAnnotation:store];
 }
 
@@ -83,8 +83,8 @@
     [self configureMap];
     
     self.americanasStoreRepository = [[AmericanasStoreRepository alloc] initWithDelegate:self];
-    //[self.americanasStoreRepository findStoresNearLatitude:assembleiaStreet98.latitude longitude:assembleiaStreet98.longitude];
-    [self.americanasStoreRepository findMockStores];
+    [self.americanasStoreRepository findStoresNearLatitude:assembleiaStreet98.latitude longitude:assembleiaStreet98.longitude];
+    //[self.americanasStoreRepository findMockStores];
 }
 
 -(void)viewDidUnload {

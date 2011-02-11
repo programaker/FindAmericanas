@@ -13,5 +13,4 @@
 @protocol AmericanasStoreRepositoryDelegate
 
 -(void)didCreateStore:(AmericanasStore*)store;
-
 @end

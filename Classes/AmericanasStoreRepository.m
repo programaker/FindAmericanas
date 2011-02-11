@@ -124,8 +124,7 @@
 }
 
 - (void)connectionDidFinishLoading:(NSURLConnection*)connection {
-    NSLog(@"Finish loading Google Maps XML. %d bytes loaded", [self.foundStoresRawData bytes]);
-    
+    NSLog(@"Finish loading Google Maps XML");    
 	self.xmlParser = [[NSXMLParser alloc] initWithData:self.foundStoresRawData];
     [self.xmlParser setDelegate:self];
 	[self.xmlParser parse];
@@ -140,7 +139,7 @@
 #pragma mark NSXMLParserDelegate
 
 -(void)parserDidStartDocument:(NSXMLParser*)parser {
-    NSLog(@"Start parsing de xml document");
+    NSLog(@"### Start xml document parsing");
 }
 
 -(void)parser:(NSXMLParser*)parser 
@@ -149,14 +148,10 @@
         qualifiedName:(NSString*)qualifiedName 
         attributes:(NSDictionary*)attributeDict {
     
-    NSLog(@"Starting element:[%@]", elementName);
-    
-	if ([@"Placemark" isEqualToString:elementName]) {
-		NSLog(@"Starting a store");
+    if ([@"Placemark" isEqualToString:elementName]) {
 		self.storeProperties = [[NSMutableDictionary alloc] init];
 	}
 	else if ([propertyNames containsObject:elementName]) {
-		NSLog(@"Starting property:[%@]", elementName);
 		self.currentProperty = elementName;
 		self.currentPropertyValue = [[NSMutableString alloc] init];
 	}
@@ -176,11 +171,8 @@
         namespaceURI:(NSString*)namespaceURI
         qualifiedName:(NSString*)qualifiedName {
     
-    NSLog(@"Ending element:[%@]", elementName);
-    
-	if ([@"Placemark" isEqualToString:elementName]) {
-		NSLog(@"Ending the store");        
-        CLLocationCoordinate2D storeCoordinates = [self parseCoordinates:[storeProperties valueForKey:@"coordinates"]];
+    if ([@"Placemark" isEqualToString:elementName]) {
+		CLLocationCoordinate2D storeCoordinates = [self parseCoordinates:[storeProperties valueForKey:@"coordinates"]];
 		
 		AmericanasStore* newStore = [[AmericanasStore alloc] 
             initWithCoordinate:storeCoordinates
@@ -191,14 +183,13 @@
 		[self.storeProperties release];
 	}
 	else if ([propertyNames containsObject:elementName]) {
-		NSLog(@"Ending property:[%@]", elementName);
 		[self.storeProperties setValue:currentPropertyValue forKey:elementName];
 		[self.currentPropertyValue release];
 	}
 }
 
 -(void)parserDidEndDocument:(NSXMLParser*)parser {
-    NSLog(@"End parsing xml document");
+    NSLog(@"### End xml document parsing");
 }
 
 - (void)parser:(NSXMLParser*)parser parseErrorOccurred:(NSError*)parseError {
