@@ -22,6 +22,8 @@
 @synthesize currentProperty;
 @synthesize currentPropertyValue;
 
+@synthesize foundStores;
+
 
 #pragma mark -
 #pragma mark Lifecycle
@@ -30,7 +32,9 @@
     self = [super init];
     
     if (self) {
+        isInsidePlacemarkTag = NO;
         self.propertyNames = [[NSSet alloc] initWithObjects:@"name",@"address",@"coordinates",nil];
+        self.foundStores = [[NSMutableArray alloc] init];
         self.delegate = _delegate;
     }
     
@@ -46,6 +50,8 @@
 	[self.currentPropertyValue release];
 	[self.storeProperties release];
 	[self.currentProperty release];
+    
+    [self.foundStores release];
     
     [super dealloc];
 }
@@ -105,14 +111,18 @@
          name:@"Lojas Americanas Ouvidor"	
          address:@"Rua do Ouvidor, nº 175"];
          
-    [self.delegate didCreateStore:[ouvidorStore autorelease]];
+    //[self.delegate didCreateStore:[ouvidorStore autorelease]];
     
     AmericanasStore* passeioStore = [[AmericanasStore alloc] 	
          initWithCoordinate:CLLocationCoordinate2DMake(-22.91201, -43.17663) 	
          name:@"Lojas Americanas Passeio"
          address:@"Rua do Passeio, nº 42"];
          
-    [self.delegate didCreateStore:[passeioStore autorelease]];
+    //[self.delegate didCreateStore:[passeioStore autorelease]];
+    
+    [self.foundStores addObject:[ouvidorStore autorelease]];
+    [self.foundStores addObject:[passeioStore autorelease]];    
+    [[NSNotificationCenter defaultCenter] postNotificationName:@"didCreateAllStores" object:nil];
 }
 
 
@@ -124,7 +134,9 @@
 }
 
 - (void)connectionDidFinishLoading:(NSURLConnection*)connection {
-    NSLog(@"Finish loading Google Maps XML");    
+    NSLog(@"Finish loading Google Maps XML");   
+    [self.foundStores removeAllObjects];
+      
 	self.xmlParser = [[NSXMLParser alloc] initWithData:self.foundStoresRawData];
     [self.xmlParser setDelegate:self];
 	[self.xmlParser parse];
@@ -132,6 +144,7 @@
 
 - (void)connection:(NSURLConnection*)connection didFailWithError:(NSError*)error {
     NSLog(@"Error retrieving locations from Google Maps");
+    [self.foundStores removeAllObjects];
 }
 
 
@@ -149,20 +162,22 @@
         attributes:(NSDictionary*)attributeDict {
     
     if ([@"Placemark" isEqualToString:elementName]) {
-		self.storeProperties = [[NSMutableDictionary alloc] init];
+        isInsidePlacemarkTag = YES;
+        self.storeProperties = [[NSMutableDictionary alloc] init];
 	}
-	else if ([propertyNames containsObject:elementName]) {
+	else if (isInsidePlacemarkTag && [propertyNames containsObject:elementName]) {
 		self.currentProperty = elementName;
 		self.currentPropertyValue = [[NSMutableString alloc] init];
 	}
 }
 
 -(void)parser:(NSXMLParser*)parser foundCharacters:(NSString*)foundCharacters {
-	if ([propertyNames containsObject:currentProperty]) {
+	if (isInsidePlacemarkTag && [self.propertyNames containsObject:self.currentProperty]) {
 		NSString* sanitizedString = [foundCharacters stringByTrimmingCharactersInSet:
-            [NSCharacterSet whitespaceAndNewlineCharacterSet]];		
-		
-        [currentPropertyValue appendString:sanitizedString];
+            [NSCharacterSet whitespaceAndNewlineCharacterSet]];
+            
+        NSLog(@"Adding value:[%@]\nto property:[%@]\n",sanitizedString,self.currentProperty);
+        [self.currentPropertyValue appendString:sanitizedString];
 	}
 }
 
@@ -178,18 +193,24 @@
             initWithCoordinate:storeCoordinates
             name:[storeProperties valueForKey:@"name"]
             address:[storeProperties valueForKey:@"address"]];
+            
+        NSLog(@"Created %@",newStore);
 		
-		[self.delegate didCreateStore:[newStore autorelease]];
+        [self.foundStores addObject:[newStore autorelease]];
+		//[self.delegate didCreateStore:[newStore autorelease]];
 		[self.storeProperties release];
+        isInsidePlacemarkTag = NO;
 	}
-	else if ([propertyNames containsObject:elementName]) {
-		[self.storeProperties setValue:currentPropertyValue forKey:elementName];
+	else if (isInsidePlacemarkTag && [propertyNames containsObject:elementName]) {
+        //NSLog(@"<%@>%@</%@>",elementName,self.currentPropertyValue,elementName);
+		[self.storeProperties setValue:self.currentPropertyValue forKey:elementName];
 		[self.currentPropertyValue release];
 	}
 }
 
 -(void)parserDidEndDocument:(NSXMLParser*)parser {
     NSLog(@"### End xml document parsing");
+    [[NSNotificationCenter defaultCenter] postNotificationName:@"didCreateAllStores" object:nil];
 }
 
 - (void)parser:(NSXMLParser*)parser parseErrorOccurred:(NSError*)parseError {

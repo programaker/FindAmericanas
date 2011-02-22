@@ -11,12 +11,14 @@
 #import "AmericanasStoreRepository.h"
 #import "AmericanasStoreRepositoryDelegate.h"
 
-@interface FindAmericanasViewController : UIViewController<MKMapViewDelegate,AmericanasStoreRepositoryDelegate> {
+@interface FindAmericanasViewController : 
+    UIViewController<MKMapViewDelegate,AmericanasStoreRepositoryDelegate,CLLocationManagerDelegate> {
 
 }
 
 @property(nonatomic,retain) IBOutlet MKMapView* mapView;
-@property(nonatomic,readwrite) CLLocationCoordinate2D mockUserLocation;
+@property(nonatomic,readwrite) CLLocationCoordinate2D userLocation;
+@property(nonatomic,retain) CLLocationManager* locationManager;
 @property(nonatomic,retain) AmericanasStoreRepository* americanasStoreRepository;
 
 @end

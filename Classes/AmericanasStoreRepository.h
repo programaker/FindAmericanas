@@ -11,7 +11,7 @@
 
 
 @interface AmericanasStoreRepository : NSObject<NSXMLParserDelegate> {
-
+    BOOL isInsidePlacemarkTag;
 }
 
 @property(nonatomic,retain) id<AmericanasStoreRepositoryDelegate> delegate;
@@ -24,6 +24,8 @@
 @property(nonatomic,retain) NSMutableDictionary* storeProperties;
 @property(nonatomic,retain) NSString* currentProperty;
 @property(nonatomic,retain) NSMutableString* currentPropertyValue;
+
+@property(nonatomic,assign) NSMutableArray* foundStores;
 
 -(id)initWithDelegate:(id<AmericanasStoreRepositoryDelegate>)_delegate;
 -(void)findStoresNearLatitude:(double)latitude longitude:(double)longitude;

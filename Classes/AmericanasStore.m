@@ -31,4 +31,12 @@
     [super dealloc];
 }
 
+-(NSString*)description {
+    return [NSString stringWithFormat:
+        @"Store(\n\tname:%@,\n\taddress:%@,\n\tcoordinates:(%f,%f)\n)",
+        self.title,
+        self.subtitle,
+        self.coordinate.latitude,self.coordinate.longitude];
+}
+
 @end

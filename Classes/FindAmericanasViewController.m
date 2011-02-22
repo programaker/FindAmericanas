@@ -14,7 +14,8 @@
 
 @synthesize mapView;
 @synthesize americanasStoreRepository;
-@synthesize mockUserLocation;
+@synthesize userLocation;
+@synthesize locationManager;
 
 
 #pragma mark -
@@ -30,6 +31,13 @@
 #pragma mark -
 #pragma mark Internal
 
+-(void)addStoresToMap {
+    for (AmericanasStore* store in self.americanasStoreRepository.foundStores) {
+        NSLog(@"+++ Adding loaded store:[%@] to map", store.title);
+        [self.mapView addAnnotation:store];
+    }
+}
+
 -(void)configureMap {
     CLLocationDegrees coordinateSpanDelta = 0.009;
     
@@ -38,13 +46,20 @@
 	span.longitudeDelta = coordinateSpanDelta;
     
     MKCoordinateRegion region;
-	region.center = self.mockUserLocation;	
+	region.center = self.userLocation;	
 	region.span = span;
     
     self.mapView.showsUserLocation = YES;
     self.mapView.delegate = self;
-	[mapView setRegion:region animated:YES];
-    [mapView regionThatFits:region];
+	[self.mapView setRegion:region animated:NO];
+    [self.mapView regionThatFits:region];
+}
+
+-(void)configureLocationManager {
+    self.locationManager = [[CLLocationManager alloc] init];
+    self.locationManager.desiredAccuracy=kCLLocationAccuracyNearestTenMeters;
+    self.locationManager.delegate = self;
+    [self.locationManager startUpdatingLocation];
 }
 
 
@@ -61,11 +76,36 @@
 #pragma mark MKMapViewDelegate
 
 -(MKAnnotationView*)mapView:(MKMapView*)map viewForAnnotation:(id<MKAnnotation>)annotation {
-    NSLog(@"Creating annotation view for store:[%@]", annotation.title);
+    if (annotation == self.mapView.userLocation) {
+        return nil;
+    }
 
-    UIImage* americanasPinImage = [UIImage imageNamed:@"americanas-pin-icon.png"];
-    AmericanasMapPin* annotationView = [[AmericanasMapPin alloc] initWithAnnotation:annotation image:americanasPinImage];    
+    NSLog(@"Creating annotation view for store:[%@]", annotation.title);
+    
+    AmericanasMapPin* annotationView = (AmericanasMapPin*)
+        [self.mapView dequeueReusableAnnotationViewWithIdentifier:@"AmericanasPin"];
+        
+    if (!annotationView) {
+        UIImage* americanasPinImage = [UIImage imageNamed:@"americanas-pin-icon.png"];
+        annotationView = [[AmericanasMapPin alloc] initWithAnnotation:annotation image:americanasPinImage];
+    }    
+    
     return [annotationView autorelease];
+}
+
+
+#pragma mark -
+#pragma mark CLLocationManagerDelegate
+
+-(void)locationManager:(CLLocationManager*)manager 
+        didUpdateToLocation:(CLLocation*)newLocation 
+        fromLocation:(CLLocation*)oldLocation {
+
+    NSLog(@"Location updated");
+    [self.locationManager stopUpdatingLocation];
+    self.userLocation = newLocation.coordinate;
+    [self configureMap];
+    [self.americanasStoreRepository findStoresNearLatitude:self.userLocation.latitude longitude:self.userLocation.longitude];
 }
 
 
@@ -74,17 +114,15 @@
 								
 - (void)viewDidLoad {
     [super viewDidLoad];
+    [self configureLocationManager];
     
-    CLLocationCoordinate2D assembleiaStreet98;
-    assembleiaStreet98.latitude = -22.905896; 
-    assembleiaStreet98.longitude = -43.17811;    
-    self.mockUserLocation = assembleiaStreet98;
-    
-    [self configureMap];
-    
+    [[NSNotificationCenter defaultCenter] 
+        addObserver:self 
+        selector:@selector(addStoresToMap) 
+        name:@"didCreateAllStores" 
+        object:nil];
+        
     self.americanasStoreRepository = [[AmericanasStoreRepository alloc] initWithDelegate:self];
-    [self.americanasStoreRepository findStoresNearLatitude:assembleiaStreet98.latitude longitude:assembleiaStreet98.longitude];
-    //[self.americanasStoreRepository findMockStores];
 }
 
 -(void)viewDidUnload {
